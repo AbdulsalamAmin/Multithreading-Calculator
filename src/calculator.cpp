@@ -27,10 +27,10 @@ std::vector<int> Calculator::GetNumbersFromConsole()
 
     return numbers;
 }
-std::vector<int> Calculator::GetNumbersFromFile(const std::string& filename)
+std::vector<int> Calculator::GetNumbersFromFile(const std::string& FileName)
 {
     std::vector<int> numbers;
-    std::ifstream file(filename);
+    std::ifstream file(FileName);
     int number;
     if(file.is_open()){
         while(file >> number){
@@ -46,7 +46,7 @@ std::vector<int> Calculator::GetNumbersFromFile(const std::string& filename)
     return numbers;
 }
 
-int Calculator::calculate(const std::vector<int>& numbers)
+int Calculator::calculate(const std::vector<int>numbers)
 {
     int num_threads;
 
@@ -59,7 +59,7 @@ int Calculator::calculate(const std::vector<int>& numbers)
     std::size_t chunk_size = numbers.size()/num_threads;
     std::vector<int> partial_sums(num_threads,0);
 
-    auto sum_chunk = [&numbers](size_t start, size_t end, int& result)
+    auto sum_chunk = [numbers](size_t start, size_t end, int& result)
     {
         result = std::accumulate(numbers.begin() + start, numbers.begin() + end, 0);
     };
