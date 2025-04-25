@@ -9,7 +9,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(Multithreading-Calculator src/main.cpp
     src/calculator.cpp
-    include/calculator.h
+    include/Calculator.h
 )
 
 include(GNUInstallDirs)

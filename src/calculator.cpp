@@ -1,4 +1,4 @@
-#include <calculator.h>
+#include <Calculator.h>
 
 #include <iostream>
 #include <string>
@@ -6,15 +6,15 @@
 #include <sstream>
 #include <vector>
 #include <numeric>
+#include <mutex>
 #include <thread>
 
 
-std::vector<int> Calculator::GetNumbersFromConsole()
+bool Calculator::GetNumbers()
 {
-    std::vector<int> numbers;
     std::string line;
 
-    std::cout << "Enter numbers seperate by space(press enter well down): ";
+    std::cout << "enter numbers seperate by space(press enter well down): ";
     std::getline(std::cin,line);
 
     std::stringstream ss(line);
@@ -25,13 +25,12 @@ std::vector<int> Calculator::GetNumbersFromConsole()
         numbers.push_back(number);
     }
 
-    return numbers;
+    return true;
 }
-std::vector<int> Calculator::GetNumbersFromFile(const std::string& FileName)
+bool Calculator::GetNumbers(const std::string &file_name)
 {
-    std::vector<int> numbers;
-    std::ifstream file(FileName);
-    int number;
+    std::ifstream file(file_name);
+    int64_t number;
     if(file.is_open()){
         while(file >> number){
             numbers.push_back(number);
@@ -39,46 +38,85 @@ std::vector<int> Calculator::GetNumbersFromFile(const std::string& FileName)
 
         file.close();
     }else{
-        std::cout << "Unable file open!"
+        std::cerr << "unable file open!"
                   << std::endl;
     }
 
-    return numbers;
+    return true;
 }
 
-int Calculator::calculate(const std::vector<int>numbers)
+int64_t Calculator::Calculate()
 {
     int num_threads;
-
-    std::cout << "Number of threads cpu "
-              << std::thread::hardware_concurrency()
+    unsigned int max_threads = std::thread::hardware_concurrency();
+    std::cout << "number of threads cpu "
+              << max_threads
               << std::endl;
-    std::cout << "Enter the number of threads: ";
-    std::cin >> num_threads;
 
+    while(true){
+        std::cout << "enter the number of threads (1 to :" << max_threads << ")" << '\n';
+
+        std::cin >> num_threads;
+        if(std::cin.fail() || num_threads <= 0 || num_threads > max_threads)
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+            std::cerr << "invalid input num thread" << '\n';
+        }else{
+
+            break;
+
+        }
+
+    }
     std::size_t chunk_size = numbers.size()/num_threads;
-    std::vector<int> partial_sums(num_threads,0);
+    std::vector<int64_t> partial_sums(num_threads);
 
-    auto sum_chunk = [numbers](size_t start, size_t end, int& result)
+    std::mutex mtx;
+    auto sum_chunk = [this,&partial_sums,&mtx](size_t start, size_t end,int64_t thread_id)
     {
-        result = std::accumulate(numbers.begin() + start, numbers.begin() + end, 0);
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            std::cout << "creating thread " << thread_id
+                      << " to process range [" << start << ", " << end << ")" << std::endl;
+        }
+        int64_t local_sum = std::accumulate(numbers.begin() + start, numbers.begin() + end,int64_t(0));
+
+        {
+            std::lock_guard<std::mutex>lock(mtx);
+            std::cout << "thread starting processing range [" << start << ", " << end << ")" << std::endl;
+
+            partial_sums[thread_id] = local_sum;
+
+
+
+            std::cout << "thread finished processing range [" << start << ", " << end << ")"
+                      << " - partial sum: " << partial_sums[thread_id] << std::endl;
+            std::cout << "-------------------------------------------" << std::endl;
+        }
+
     };
 
     std::vector<std::thread> threads;
 
     for (int i = 0; i < num_threads; ++i){
+
         size_t start = i * chunk_size;
         size_t end = (i == num_threads - 1) ? numbers.size() : start + chunk_size;
 
-        threads.emplace_back(sum_chunk, start, end, std::ref(partial_sums[i]));
+
+        threads.emplace_back(sum_chunk, start, end,i);
     }
 
     for (auto& t : threads){
         t.join();
     }
 
-    int total_sum = std::accumulate(partial_sums.begin(), partial_sums.end(), 0);
+    int64_t total_sum = std::accumulate(partial_sums.begin(), partial_sums.end(), int64_t(0));
+
+
 
     return total_sum;
 }
+
 

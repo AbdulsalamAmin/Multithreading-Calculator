@@ -1,4 +1,4 @@
-#include <calculator.h>
+#include <Calculator.h>
 
 #include <iostream>
 #include <string>
@@ -12,34 +12,61 @@
 int main()
 {
     Calculator cal;
-    int Choice;
+    char again;
+    do{
+        int choice;
+        bool valid_input = false;
 
-    std::cout << "Choose input method:\n1. From Console\n2. From File\n";
-    std::cin >> Choice;
-    std::cin.ignore();
+        while(!valid_input){
 
-    std::vector<int> numbers;
 
-    if(Choice == 1){
-        numbers = cal.GetNumbersFromConsole();
-    }else if(Choice == 2){
-        std::string  FileName;
-        std::cout << "Enter filename and dir: ";
-        std::getline(std::cin,FileName);
-        numbers = cal.GetNumbersFromFile(FileName);
-    }else{
-        std::cout << "Invalid choice.\n";
+            std::cout << "choose input method:\n1. from console\n2. from file\n";
 
-        return 1;
-    }
+            std::cin >> choice;
+            std::cin.ignore(),'\n';
 
-    int sum;
+            if (std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cerr << "Invalid input. Please enter 1 or 2.\n";
 
-    sum = cal.calculate(numbers);
-    std::cout << "the sum of the numbers is:"
-              << sum
-              << std::endl;
+                continue;
+
+            }
+            valid_input = true;
+
+            std::vector<int64_t> numbers;
+
+            if(choice == 1){
+                cal.GetNumbers();
+
+            }else if(choice == 2){
+                std::string  file_name;
+
+                std::cout << "enter file_name and directory: ";
+                std::getline(std::cin,file_name);
+
+                cal.GetNumbers(file_name);
+            }else{
+                std::cerr << "Invalid choice.\n";
+
+                continue;
+            }
+
+            int64_t sum;
+
+            sum = cal.Calculate();
+            std::cout << "the sum of the numbers is:"
+                      << sum
+                      << std::endl;
+            std::cout << "do you want to continue? (y/n): ";
+            std::cin >> again;
+
+
+        }
+    }while(std::tolower(again) == 'y');
+
+    std::cout<<"goodby👋\n";
 
     return 0;
-
 }
