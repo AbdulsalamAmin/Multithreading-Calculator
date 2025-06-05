@@ -59,6 +59,9 @@ int main()
             std::cout << "the sum of the numbers is:"
                       << sum
                       << std::endl;
+
+            cal = Calculator();
+
             std::cout << "do you want to continue? (y/n): ";
             std::cin >> again;
 
