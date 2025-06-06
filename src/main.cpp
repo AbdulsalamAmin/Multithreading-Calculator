@@ -69,7 +69,7 @@ int main()
         }
     }while(std::tolower(again) == 'y');
 
-    std::cout<<"goodby👋\n";
+    std::clog<<"goodby👋\n";
 
     return 0;
 }

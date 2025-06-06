@@ -49,12 +49,12 @@ int64_t Calculator::Calculate()
 {
     int num_threads;
     unsigned int max_threads = std::thread::hardware_concurrency();
-    std::cout << "number of threads cpu "
+    std::clog << "number of threads cpu: "
               << max_threads
               << std::endl;
 
     while(true){
-        std::cout << "enter the number of threads (1 to :" << max_threads << ")" << '\n';
+        std::clog << "enter the number of threads (1 to :" << max_threads << ")" << '\n';
 
         std::cin >> num_threads;
         if(std::cin.fail() || num_threads <= 0 || num_threads > max_threads)
@@ -77,22 +77,22 @@ int64_t Calculator::Calculate()
     {
         {
             std::lock_guard<std::mutex> lock(mtx);
-            std::cout << "creating thread " << thread_id
+            std::clog << "creating thread " << thread_id
                       << " to process range [" << start << ", " << end << ")" << std::endl;
         }
         int64_t local_sum = std::accumulate(numbers.begin() + start, numbers.begin() + end,int64_t(0));
 
         {
             std::lock_guard<std::mutex>lock(mtx);
-            std::cout << "thread starting processing range [" << start << ", " << end << ")" << std::endl;
+            std::clog << "thread starting processing range [" << start << ", " << end << ")" << std::endl;
 
             partial_sums[thread_id] = local_sum;
 
 
 
-            std::cout << "thread finished processing range [" << start << ", " << end << ")"
+            std::clog << "thread finished processing range [" << start << ", " << end << ")"
                       << " - partial sum: " << partial_sums[thread_id] << std::endl;
-            std::cout << "-------------------------------------------" << std::endl;
+            std::clog << "-------------------------------------------" << std::endl;
         }
 
     };
